@@ -28,7 +28,6 @@ class GiajSpider(scrapy.Spider):
                 yield scrapy.Request(dl_link, callback=self.save_zip, cb_kwargs=kwargs) 
 
     def save_zip(self, response, **kwargs):
-        print(kwargs)
         m = re.match(".*/(\d+)\.html?", kwargs['page'])
         if m is None:
             return
@@ -37,6 +36,7 @@ class GiajSpider(scrapy.Spider):
         item = ScrapeItem()
         item['fname'] = fname
         item['pref_id'] = pref_id
+        item['city_id'] = fname.split('.')[0]
         item['pref_name'] = kwargs['pref']
         item['city_name'] = kwargs['city']
         item['created_at'] = datetime.strftime(datetime.now(), "%Y-%m-%d %H:%M:%S")
@@ -54,13 +54,14 @@ class GiajSpider(scrapy.Spider):
                 f.write(response.body)
 
     def close(self, reason):
-        info_path = os.path.join(self.save_dir, "infos.txt")
+        info_path = os.path.join("infos.txt")
         with open(info_path, "w") as wf:
             for pref_id in sorted(self.infos.keys()):
                 for item in self.infos[pref_id]:
                     wf.write(
                         "{},{},{},{},{}\n".format(
                             item['pref_id'],
+                            item['city_id'],
                             item['pref_name'],
                             item['city_name'],
                             item['fname'],

@@ -9,10 +9,9 @@ import scrapy
 
 
 class ScrapeItem(scrapy.Item):
-    # define the fields for your item here like:
-    # name = scrapy.Field()
     fname = scrapy.Field()
     pref_id = scrapy.Field()
+    city_id = scrapy.Field()
     pref_name = scrapy.Field()
     city_name = scrapy.Field()
     created_at = scrapy.Field()
