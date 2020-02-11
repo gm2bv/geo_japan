@@ -1,0 +1,8 @@
+scrape/dats
+.gitignore
+__pycache__/
+*__pycache__/
+*~
+scrape/output
+scrape/dats
+scrape/infos.txt
