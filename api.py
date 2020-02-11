@@ -5,6 +5,7 @@ import pandas as pd
 import os
 import nagisa
 import mojimoji
+import re
 
 api = FlaskAPI(__name__)
 api.debug = True
@@ -60,7 +61,10 @@ def find():
         num_infos = num_infos.replace("丁目", "-")
         num_infos = num_infos.replace("番地", "-")
         num_infos = num_infos.replace("号", "")
-        num_infos = num_infos.split('-')
+        num_infos = num_infos.replace("ー", "-")
+        num_infos = num_infos.replace("ｰ", "-")
+        num_infos = re.sub(r'[-ー]+', ',', num_infos)
+        num_infos = num_infos.split(',')
         while not num_infos[-1]:
             del num_infos[-1]
         num_infos = [int(num) for num in num_infos]
