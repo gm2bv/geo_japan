@@ -26,7 +26,7 @@ $ python api.py  # WEBサーバー起動
 
 ブラウザで
 > http://localhost:5000?addres=東京都千代田区永田町２丁目3-1
-
+と指定するとGEOコーディングした結果が返ります
 ```
 HTTP 200 OK
 Content-Type: application/json
@@ -50,7 +50,6 @@ Content-Type: application/json
 }
 ```
 
-と指定するとGEOコーディングした結果が返ります
 
 ## 更新履歴
 - 2020/03/07　検索ロジックを高一致率のものを抽出する方式に変更
