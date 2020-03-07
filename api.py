@@ -91,7 +91,7 @@ def find():
 
     target = dat[dat['town_infos'].str.contains(_town)].copy()  # 町名から抽出
     if len(target) == 0:
-        raise exceptions.NotFound('見つかりません')
+        raise exceptions.NotFound('町名が見つかりません')
 
     if len(rest_words[num:]) > 0:
         # 町番号・番地・号の判定
@@ -182,8 +182,6 @@ def get_pref_city(words):
 def parse_num_infos(words):
     # 町番号・番地・号の判定
     ## 半角数字にして分割、リスト化する
-    print(words)
-
     i = 0
     cnt = len(words)
     while i < cnt:
@@ -194,9 +192,11 @@ def parse_num_infos(words):
         _w = _w.replace("番", "-")
         _w = _w.replace("の", "-")
         _w = _w.replace("号", "")
-        _w = _w.replace("ー", "-")
-        _w = _w.replace("ｰ", "-")
+        _w = _w.replace("ー", "-")  # 様々なハイフン１
+        _w = _w.replace("−", "-")   # 様々なハイフン２
+        _w = _w.replace("ｰ", "-")   # 様々なハイフン３
         _w = _w.replace(" ", "-")
+        print(words[i], _w)
         words[i] = _w
         i += 1
 
@@ -206,6 +206,7 @@ def parse_num_infos(words):
     for _w in words:
         if _w == '-':
             if temp:
+                print(_w, temp)
                 num_infos.append(temp)
                 temp = ""
                 num += 1
@@ -216,7 +217,9 @@ def parse_num_infos(words):
             num_infos.append(temp)
             break
         temp = temp + _w
-
+    if temp and re.match("\d+", temp):
+        num_infos.append(temp)
+    print(num_infos)
     # 末尾が空白/Noneのものは削除
     while not num_infos[-1]:
         del num_infos[-1]
