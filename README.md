@@ -25,7 +25,30 @@ $ python api.py  # WEBサーバー起動
 ```
 
 ブラウザで
-> http://localhost:5000?addres=東京都世田谷区玉川一丁目14番1号
+> http://localhost:5000?addres=東京都千代田区永田町２丁目3-1
+
+```
+HTTP 200 OK
+Content-Type: application/json
+
+{
+    "pref": "東京都",
+    "city": "千代田区",
+    "town": "永田町",
+    "infos": [
+        "2",
+        "3"
+    ],
+    "latitude": 139.743113,
+    "longitude": 35.672826,
+    "search_info": {
+        "hit_words": [
+            "永田町 2 3"
+        ],
+        "ratio": 1.0
+    }
+}
+```
 
 と指定するとGEOコーディングした結果が返ります
 
