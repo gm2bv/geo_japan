@@ -26,7 +26,9 @@ $ python api.py  # WEBサーバー起動
 
 ブラウザで
 > http://localhost:5000?addres=東京都千代田区永田町２丁目3-1
+
 と指定するとGEOコーディングした結果が返ります
+
 ```
 HTTP 200 OK
 Content-Type: application/json
