@@ -9,7 +9,13 @@ import xml.etree.ElementTree as etree
 from datetime import datetime
 from kanjize import kanji2int
 
+"""
+総務省　全国地方公共団体コード
+https://www.soumu.go.jp/denshijiti/code.html
+"""
 DAT=os.path.join("infos", "R1.5.1現在の団体-表1.csv")
+
+
 URL='http://nlftp.mlit.go.jp/isj/api/1.0b/index.php/app/getISJURL.xml'
 PARAMS={
     'appId': 'isjapibeta1',

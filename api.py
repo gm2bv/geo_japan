@@ -12,10 +12,18 @@ from kanjize import kanji2int
 api = FlaskAPI(__name__)
 api.debug = True
 
-# pref_cd,town_cd,pref_name,town_name,file_name
-info = pd.read_csv(os.path.join("scrape", "infos.txt"), dtype=str, header=None, sep=',')
+path_scrape = os.path.join("scrape", "infos.txt")
+if os.path.exists(path_scrape):
+    # pref_cd,town_cd,pref_name,town_name,file_name
+    info = pd.read_csv(path_scrape, dtype=str, header=None, sep=',')
+else:
+    raise Exception("ERROR", "can't fine scrape/infos.txt")
+
 # pref_cd,pref_name,town_name
-info2 = pd.read_csv(os.path.join("tools", "infos.txt"), dtype=str, header=None, sep=',')
+path_home_affairs = os.path.join("home_affairs", "infos.txt")
+if os.path.exists(path_home_affairs):
+    info2 = pd.read_csv(path_home_affairs, dtype=str, header=None, sep=',')
+
 prefs = list(info.groupby(2).groups.keys())
 
 
@@ -43,7 +51,7 @@ def find():
     ## tools以下の情報を使う
     pref_city = info[info[2] == _pref]
     pref_id = pref_city[0].values[0]
-    pc_path = os.path.join("tools", "output", "{:02}_2018.csv.gz".format(int(pref_id)))
+    pc_path = os.path.join("home_affairs", "output", "{:02}_2018.csv.gz".format(int(pref_id)))
     if not os.path.exists(pc_path):
         raise exceptions.NotFound()
     ## pref, city, town_infos,lat, lng
@@ -56,18 +64,17 @@ def find():
         pref_id = pref_city[0].values[0]
         city_id = pref_city[1].values[0]
         pc_path2 = os.path.join("scrape", "output", "{}_{}.csv.gz".format(pref_id, city_id))
-        if not os.path.exists(pc_path2):
-            raise exceptions.NotFound()
-        dat2 = pd.read_csv(pc_path2, compression='gzip', header=None, dtype=str)
-        print(pc_path, pc_path2, dat.shape, dat2.shape)
-        dat = pd.concat([dat, dat2])
+        if os.path.exists(pc_path2):
+            dat2 = pd.read_csv(pc_path2, compression='gzip', header=None, dtype=str)
+            print(pc_path, pc_path2, dat.shape, dat2.shape)
+            dat = pd.concat([dat, dat2])
 
     dat.columns = [
         'pref',
         'city',
         'town_infos',
-        'lat',
         'lng',
+        'lat',
     ]
     ## データのクレンジング
     dat.fillna('', inplace=True)
@@ -100,11 +107,18 @@ def find():
 
         # もう少し絞り込む
         _hit = _town
+        _cnt = 0
         for _info in num_infos:
             if len(target[target['town_infos'].str.contains(_hit + " " + _info)]) == 0:
                 break
             _hit += " " + _info
+            _cnt += 1
         target = target[target['town_infos'].str.contains(_hit)].copy()
+        if _cnt == 2:
+            # "号"を含めて検索できなかった場合、番地の複数桁で誤検知する場合がある
+            # 例）「2 4 4」-> "2 40 4" で誤検知
+            ptn = re.compile("{}\d+".format(_hit))
+            target.drop(target[target['town_infos'].str.match(ptn)]['town_infos'].index, inplace=True)
 
         # 最後は合致率を計算して最大値のものを抽出
         _infos = "{} {}".format(_town, " ".join(num_infos))
@@ -196,7 +210,7 @@ def parse_num_infos(words):
         _w = _w.replace("−", "-")   # 様々なハイフン２
         _w = _w.replace("ｰ", "-")   # 様々なハイフン３
         _w = _w.replace(" ", "-")
-        print(words[i], _w)
+#        print(words[i], _w)
         words[i] = _w
         i += 1
 
@@ -215,6 +229,7 @@ def parse_num_infos(words):
             # ３つ目以上の数字判定中（号の判定）に文字が出たら
             # ビル名やマンション名なので無視する
             num_infos.append(temp)
+            temp = ""
             break
         temp = temp + _w
     if temp and re.match("\d+", temp):
