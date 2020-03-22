@@ -16,8 +16,8 @@ $ cd scrape
 $ scrapy runspider scrape/spider/giaj.py
   # データをスクレイピングしてローカルに適切に配置し直すのでしばらく時間がかかります
 
-$ cd ../tools
-$ python get_isj.py
+$ cd ../home_affairs
+$ scrapy runspider home_affairs/spider/city_code.py
   # データをダウンロードしてローカルに適切に配置し直すのでしばらく時間がかかります
 
 $ cd ..
@@ -54,5 +54,6 @@ Content-Type: application/json
 
 
 ## 更新履歴
+- 2020/03/23  総務省・国土交通省からデータをスクレイピングする箇所を修正
 - 2020/03/07　検索ロジックを高一致率のものを抽出する方式に変更
 - 2020/02 初版
