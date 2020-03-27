@@ -33,6 +33,15 @@ class GiajSpider(scrapy.Spider):
             return
         pref_id = int(m.groups()[0])
         fname = response.url.split('/')[-1]
+
+        # ファイルのダウンロード
+        _dir = os.path.join(self.save_dir, str(pref_id))
+        os.makedirs(_dir, exist_ok=True)
+        path = os.path.join(_dir, fname)
+        if not os.path.exists(path):
+            with open(path, 'wb') as f:
+                f.write(response.body)
+
         item = ScrapeItem()
         item['fname'] = fname
         item['pref_id'] = pref_id
@@ -44,14 +53,6 @@ class GiajSpider(scrapy.Spider):
         if pref_id not in self.infos:
             self.infos[pref_id] = []
         self.infos[pref_id].append(item)
-
-        # ファイルのダウンロード
-        _dir = os.path.join(self.save_dir, str(pref_id))
-        os.makedirs(_dir, exist_ok=True)
-        path = os.path.join(_dir, fname)
-        if not os.path.exists(path):
-            with open(path, 'wb') as f:
-                f.write(response.body)
 
     def close(self, reason):
         info_path = os.path.join("infos.txt")
