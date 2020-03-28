@@ -12,16 +12,19 @@ class GeoEngine():
     prefs = None
 
     def __init__(self):
-        path_scrape = os.path.join("scrape", "infos.txt")
+        _dirs = os.path.split(__file__)
+        self._dir = os.path.join(_dirs[0], "..")
+
+        path_scrape = os.path.join(self._dir, "scrape", "infos.txt")
         if os.path.exists(path_scrape):
             # pref_cd,town_cd,pref_name,town_name,file_name
             info = pd.read_csv(path_scrape, dtype=str, header=None, sep=',')
             self.infos.append(info)
         else:
-            raise Exception("ERROR", "can't find 'scrape/infos.txt'")
+            raise Exception("ERROR", "can't find '{}'".format(self._dir))
 
         # pref_cd,pref_name,town_name
-        path_home_affairs = os.path.join("home_affairs", "infos.txt")
+        path_home_affairs = os.path.join(self._dir, "home_affairs", "infos.txt")
         if os.path.exists(path_home_affairs):
             info2 = pd.read_csv(path_home_affairs, dtype=str, header=None, sep=',')
             self.infos.append(info2)
@@ -71,18 +74,19 @@ class GeoEngine():
 
             # もう少し絞り込む
             _hit = _town
-            _cnt = 0
             for _info in num_infos:
                 if len(target[target['town_infos'].str.contains(_hit + " " + _info)]) == 0:
                     break
                 _hit += " " + _info
-                _cnt += 1
             target = target[target['town_infos'].str.contains(_hit)].copy()
-            if _cnt == 2:
-                # "号"を含めて検索できなかった場合、番地の複数桁で誤検知する場合がある
-                # 例）「2 4 4」-> "2 40 4" で誤検知
-                ptn = re.compile("{}\d+".format(_hit))
-                target.drop(target[target['town_infos'].str.match(ptn)]['town_infos'].index, inplace=True)
+
+            # 2桁以上の数字での誤検知を除外
+            # 例）「2 4 4」-> "2 40 4" で誤検知
+            ptn = re.compile("{}\d+".format(_hit))
+            target.drop(target[target['town_infos'].str.match(ptn)]['town_infos'].index, inplace=True)
+
+            if len(target) == 0:
+                raise Exception('ERROR', '該当の住所が見つかりません')
 
             # 最後は合致率を計算して最大値のものを抽出
             _infos = "{} {}".format(_town, " ".join(num_infos))
@@ -165,7 +169,7 @@ class GeoEngine():
         ## home_affairsを使う
         pref_city = info[info[2] == pref]
         pref_id = pref_city[0].values[0]
-        pc_path = os.path.join("home_affairs", "output", "{:02}_2018.csv.gz".format(int(pref_id)))
+        pc_path = os.path.join(self._dir, "home_affairs", "output", "{:02}_2018.csv.gz".format(int(pref_id)))
         if not os.path.exists(pc_path):
             raise exceptions.NotFound()
         ## pref, city, town_infos,lat, lng
@@ -176,7 +180,7 @@ class GeoEngine():
             pref_city = info[(info[2] == pref) & (info[3] == city)]
             pref_id = pref_city[0].values[0]
             city_id = pref_city[1].values[0]
-            pc_path2 = os.path.join("scrape", "output", "{}_{}.csv.gz".format(pref_id, city_id))
+            pc_path2 = os.path.join(self._dir, "scrape", "output", "{}_{}.csv.gz".format(pref_id, city_id))
             if os.path.exists(pc_path2):
                 dat2 = pd.read_csv(pc_path2, compression='gzip', header=None, dtype=str)
                 print(pc_path, pc_path2, dat.shape, dat2.shape)
