@@ -29,6 +29,7 @@ class GeoEngine():
             info2 = pd.read_csv(path_home_affairs, dtype=str, header=None, sep=',')
             self.infos.append(info2)
 
+        # 都道府県id情報を抽出
         self.prefs = list(info.groupby(2).groups.keys())
 
     def coding(self, address):
@@ -53,17 +54,23 @@ class GeoEngine():
         num = 0
         _w = rest_words[num]
         if _w:
-            while num < cnt and len(dat[dat['town_infos'].str.contains(_w)]) > 0:
-                if num >= (cnt - 1) or len(dat[dat['town_infos'].str.contains(_w + rest_words[num + 1])]) == 0:
+            _dat_temp = dat[dat['town_infos'].str.contains(_w)]
+            while num < cnt and len(_dat_temp) > 0:
+                if num >= (cnt - 1):
+                    break;
+                __temp = _dat_temp[_dat_temp['town_infos'].str.contains(_w + rest_words[num + 1])]
+                if len(__temp) == 0:
                     break
+                _dat_temp = __temp
                 _w = _w + rest_words[num + 1]
                 num += 1
             _town = _w
         else:
+            _dat_temp = dat
             _town = ''
         num += 1
 
-        target = dat[dat['town_infos'].str.contains(_town)].copy()  # 町名から抽出
+        target = _dat_temp[_dat_temp['town_infos'].str.contains(_town)].copy()  # 町名から抽出
         if len(target) == 0:
             raise Exception('ERROR', '町名が見つかりません')
 
@@ -134,7 +141,7 @@ class GeoEngine():
                 num += 1
             _pref = w
         else:
-            raise exception.APIException("都道府県の指定が不正です")
+            raise Exception("ERROR", "都道府県の指定が不正です")
 
         # 市区判定
         num += 1
@@ -157,7 +164,7 @@ class GeoEngine():
                     num += 1
                 _city = w
             else:
-                raise exceptions.APIException("市町村区の指定が不正です")
+                raise Exception("ERROR", "市町村区の指定が不正です")
 
         return (_pref, _city)
 
@@ -167,11 +174,11 @@ class GeoEngine():
 
         # データ読込＆解析＆抽出
         ## home_affairsを使う
-        pref_city = info[info[2] == pref]
+        pref_city = info2[info2[1] == pref]
         pref_id = pref_city[0].values[0]
         pc_path = os.path.join(self._dir, "home_affairs", "output", "{:02}_2018.csv.gz".format(int(pref_id)))
         if not os.path.exists(pc_path):
-            raise exceptions.NotFound()
+            raise Exception("ERROR", "NotFound")
         ## pref, city, town_infos,lat, lng
         ##  * town_infos: "town town_s town_num num1 num2"
         dat = pd.read_csv(pc_path, compression='gzip', header=None, dtype=str)
