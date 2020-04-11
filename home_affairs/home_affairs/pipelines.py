@@ -15,6 +15,9 @@ import xml.etree.ElementTree as etree
 from datetime import datetime
 from kanjize import kanji2int
 
+"""
+http://nlftp.mlit.go.jp/isj/
+"""
 URL='http://nlftp.mlit.go.jp/isj/api/1.0b/index.php/app/getISJURL.xml'
 PARAMS={
     'appId': 'isjapibeta1',
