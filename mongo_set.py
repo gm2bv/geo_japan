@@ -52,11 +52,20 @@ def _insert_collection(path, collection_name):
     if len(dat) == 0:
         return
     dat['town_name'] = dat.apply(_get_town_name, axis=1)
-    records = json.loads(dat.T.to_json()).values()
+#    records = json.loads(dat.T.to_json()).values()
 
     db = _db()
     collection = db[collection_name]
-    collection.insert_many(records)
+#    collection.insert_many(records)
+
+    _size = 1000000
+    _len = len(dat)
+    _temp = 0
+    while _temp < _len:
+        __size = (_temp + _size) - 1
+        _dat = dat.loc[_temp:__size]
+        collection.insert_many(_dat.T.to_dict().values())
+        _temp += _size
     del db
 
 

@@ -1,5 +1,5 @@
-import os
-import pandas as pd
+#import os
+#import pandas as pd
 import numpy as np
 import nagisa
 import re
@@ -16,11 +16,11 @@ def now_time():
 
 class GeoEngineMongo():
     def coding(self, address):
-        print(now_time(), "111")
+#        print(now_time(), "111")
         token = nagisa.tagging(address)
-        print(now_time(), "222")
+#        print(now_time(), "222")
         (_pref, _city, _pid) = self.get_pref_city(token.words)
-        print(now_time(), "333")
+#        print(now_time(), "333")
 
         ## 誤解析を防ぐために都道府県・市町村をぬいてから再度トークンを分割する
         ptn = re.compile(r"^{}\s*{}(.*)$".format(_pref, _city))
@@ -33,7 +33,7 @@ class GeoEngineMongo():
         if cnt == 0:
             # パラメータ情報が少なすぎ
             raise Exception("ERROR", "パラメータ情報が少なすぎです")
-        print(now_time(), "444", _pref, _city)
+#        print(now_time(), "444", _pref, _city)
 
         # 町名の判定
         num = 0
@@ -54,10 +54,10 @@ class GeoEngineMongo():
             raise Exception('ERROR', '指定のパラメータでは抽出できません')
 
         ## 半角数字にして分割、リスト化する
-        print(now_time(), "666", rest_words, num)
+#        print(now_time(), "666", rest_words, num)
         num_infos = GeoEngineMongo.parse_num_infos(rest_words[num:])
         
-        print(now_time(), "777")
+#        print(now_time(), "777")
         # もう少し絞り込む
         _hit = _town
         q = None
@@ -94,7 +94,7 @@ class GeoEngineMongo():
             if _q.count() != 0:
                 q = _q
             
-        print(now_time(), "888", _hit, q.count())
+#        print(now_time(), "888", _hit, q.count())
 
         # 最後は合致率を計算して最大値のものを抽出
         _infos = "{} {}".format(_town, " ".join(num_infos))
@@ -112,7 +112,7 @@ class GeoEngineMongo():
         latitude = np.mean([float(row[0]) for row in ret[max_ratio]])
         longitude = np.mean([float(row[1]) for row in ret[max_ratio]])        
 
-        print(now_time(), "999")
+#        print(now_time(), "999")
         
         return {
             "pref": _pref,
