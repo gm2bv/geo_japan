@@ -17,6 +17,8 @@ def now_time():
 class GeoEngineMongo():
     def coding(self, address):
 #        print(now_time(), "111")
+#        address = mojimoji.zen_to_han(address, kana=False, ascii=False)
+#        print("ADDRESS", address)
         token = nagisa.tagging(address)
 #        print(now_time(), "222")
         (_pref, _city, _pid) = self.get_pref_city(token.words)
@@ -54,10 +56,10 @@ class GeoEngineMongo():
             raise Exception('ERROR', '指定のパラメータでは抽出できません')
 
         ## 半角数字にして分割、リスト化する
-#        print(now_time(), "666", rest_words, num)
+        print(now_time(), "666", rest_words, num)
         num_infos = GeoEngineMongo.parse_num_infos(rest_words[num:])
         
-#        print(now_time(), "777")
+        print(now_time(), "777", num_infos)
         # もう少し絞り込む
         _hit = _town
         q = None
@@ -183,6 +185,7 @@ class GeoEngineMongo():
         _town = prefix
         num = 0
         while True or num < (_len - 1):
+            print(city, "{}{}".format(_town, rest_words[num]))
             q = self.find_like(pref_id, city, "{}{}".format(_town, rest_words[num]))
             if q.count() == 0:
                 break
@@ -266,7 +269,7 @@ class GeoEngineMongo():
                 num_infos.append(temp)
                 temp = ""
                 break
-            if num == 0 and re.match("\d+", _w) and temp:
+            if num == 0 and re.match("\d+", _w) and re.match("[^\d]+", temp):
                 # いきなり字が入る場合の対応
                 num_infos.append(temp)
                 temp = ""
