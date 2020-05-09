@@ -8,6 +8,7 @@ import difflib
 import mojimoji
 from datetime import datetime
 from pymongo import MongoClient
+from kanjize import int2kanji
 
 
 def now_time():
@@ -17,8 +18,6 @@ def now_time():
 class GeoEngineMongo():
     def coding(self, address):
 #        print(now_time(), "111")
-#        address = mojimoji.zen_to_han(address, kana=False, ascii=False)
-#        print("ADDRESS", address)
         token = nagisa.tagging(address)
 #        print(now_time(), "222")
         (_pref, _city, _pid) = self.get_pref_city(token.words)
@@ -41,6 +40,7 @@ class GeoEngineMongo():
         num = 0
         if rest_words[num]:
             # 町名を抽出
+            rest_words = GeoEngineMongo.town_name_ex_jou(rest_words)
             (_temp, _town, num) = self.select_town(_pid, _city, rest_words)                
             if not _temp or _temp.count() == 0:
                 # 念のため"字"で検索
@@ -177,7 +177,7 @@ class GeoEngineMongo():
 
     def _db(self):
         client = MongoClient(host='localhost')
-        return client['geo_japan']
+        return client['geo_japan']        
 
     def select_town(self, pref_id, city, rest_words, prefix=""):
         _len = len(rest_words)
@@ -289,3 +289,41 @@ class GeoEngineMongo():
                 num_infos[i] = str(kanji2int(_info))
             i += 1
         return num_infos
+
+    @staticmethod
+    def town_name_ex_jou(rest_words):
+        """
+        町名に"〜条"を含む場合に漢数字でなく数字が使われていた場合の対応
+        """
+        if len(rest_words) == 1:
+            return rest_words
+
+        if any([True if re.match('^条', w) else False for w in rest_words[1:]]) is False:
+            return rest_words
+
+        if any([True if re.match("[\d１２３４５６７８９０]+", w) else False for w in rest_words]) is False:
+            return rest_words
+
+        # ここからは"条"があることが前提の処理
+        _words = []
+        temp = ""
+        num = 0
+        for w in rest_words:
+            if re.match("[\d１２３４５６７８９０]+", w):
+                temp = temp + w
+            elif re.match("^条", w):
+                if not temp:
+                    # '条'の前に全角数字・半角数字がなかった
+                    return rest_words
+                # ここに入る時はtempは数字の文字列
+                temp = mojimoji.zen_to_han(temp, kana=False, ascii=False)
+                temp = int2kanji(int(temp))
+                _words.append(temp + w)
+                num += 1
+                break
+            else:
+                # 数字でも'条'でもない
+                _words.append(w)
+            num += 1
+        _words.extend(rest_words[num:])
+        return _words
