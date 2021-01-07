@@ -17,7 +17,7 @@ itsdangerous==1.1.0
 jedi==0.16.0
 Jinja2==2.11.1
 kanjize==0.1.0
-lxml==4.5.0
+lxml==4.6.2
 MarkupSafe==1.1.1
 mojimoji==0.0.9
 nagisa==0.2.5
